@@ -1,5 +1,5 @@
 head
-    title phoenix culture
+    title konnect
     meta(name='viewport', content='user-scalable=yes, initial-scale=1.0, maximum-scale=1.5, width=device-width')
     meta(name='apple-mobile-web-app-capable', content='yes')
     meta(name='apple-mobile-web-app-status-bar-style', content='black')
@@ -27,7 +27,6 @@ head
     // script(src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript")
     
     // script(src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js")
-    script(src="https://cdn.jsdelivr.net/npm/sweetalert2@9")
     script(src="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/suneditor.min.js")
     script(src="https://cdn.jsdelivr.net/npm/suneditor@latest/src/lang/en.js")
 
@@ -46,20 +45,20 @@ template(name='nav')
         //         i.big.loading.grey.refresh.icon.cancel
         // else 
         a.header.item.zoomer(href='/' class="{{isActivePath '/'}}" )
-            +icolor name='fenix'
+            +icolor name='groups'
             // img(src='/android-chrome-192x192.png')
-            strong.mobile.hidden Phoenix Culture
+            strong.mobile.hidden konnect
         a.icon.item.invert_toggle(title='dark mode')
             +i name='light'
         // // .icon.item 
         // //     i.large.search.icon
-        .search.item.zoomer.mobile.hidden(title='search')
-            .ui.icon.input
-                if current_product_search
-                    i.remove.large.red.link.icon.clear_search
-                else
-                    i.search.large.icon
-                input.global_search(type='text' autocomplete="off" value=current_searchs)
+        // .search.item.zoomer.mobile.hidden(title='search')
+        //     .ui.icon.input
+        //         if current_product_search
+        //             i.remove.large.red.link.icon.clear_search
+        //         else
+        //             i.search.large.icon
+        //         input.global_search(type='text' autocomplete="off" value=current_searchs)
         .right.menu
             if currentUser
                 a.icon.item.add_post(title='add post')
@@ -114,58 +113,6 @@ template(name='nav')
                     // i.sign.in.large.icon
                     +i name='internal'
                     span.mobile.hidden login
-    .ui.attached.small.borderless.menu.hscroll
-        a.icon.item.fly_right(href="/events" class="{{isActiveRoute 'events'}}" title='events')
-            // i.large.calendar.icon
-            small #{event_counter}
-            +i name='calendar'
-            span.mobile.hidden events
-        a.icon.item.fly_right(href="/profiles" class="{{isActiveRoute 'profiles'}}" title='profiles')
-            // i.large.calendar.icon
-            small #{profile_counter}
-            +i name='groups'
-            span.mobile.hidden profiles
-        if currentUser.admin_mode
-            a.icon.item.fly_right(href="/users" class="{{isActiveRoute 'users'}}" title='users')
-                small #{user_counter}
-                // i.large.users.icon
-                +i name='gender-neutral-user'
-                .mobile.hidden users 
-        a.icon.item.fly_right(href="/groups" class="{{isActiveRoute 'groups'}}" title='groups')
-            // i.large.fire.icon
-            small #{group_counter}
-            +i name='campfire'
-            span.mobile.hidden groups
-        a.icon.item.fly_right(href="/posts" class="{{isActiveRoute 'posts'}}" title='posts')
-            // i.large.blog.icon
-            small #{post_counter}
-            +i name='blog'
-            span.mobile.hidden posts
-        a.icon.item.fly_right(href="/transfers" class="{{isActiveRoute 'transfers'}}" title='transfers')
-            // i.large.exchange.icon
-            small #{transfer_counter}
-            +i name='exchange'
-            span.mobile.hidden transfers
-        a.icon.item.fly_right(href="/tasks" class="{{isActiveRoute 'tasks'}}" title='tasks')
-            // i.large.exchange.icon
-            small #{task_counter}
-            +i name='tasks'
-            span.mobile.hidden tasks
-        a.icon.item.fly_right(href="/rentals" class="{{isActiveRoute 'rentals'}}" title='rentals')
-            // i.large.exchange.icon
-            small #{rental_counter}
-            +i name='clock'
-            span.mobile.hidden rentals
-        a.icon.item.fly_right(href="/products" class="{{isActiveRoute 'products'}}" title='products')
-            // i.large.users.icon
-            small #{product_counter}
-            +i name='shop'
-            .mobile.hidden products 
-    
-            // each model_docs
-            //     a.item.zoomer.reset(href='/m/#{slug}' class="{{isActivePath '/delta'}}")
-            //         +i name=icon
-            //         span.mobile.hidden #{title}
                 
     
 template(name='layout')
