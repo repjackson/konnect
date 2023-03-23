@@ -1,0 +1,249 @@
+template(name='transfers')
+    .ui.stackable.padded.grid
+        .four.wide.column
+            .ui.inline.header 
+                +i name='exchange'
+                // i.fire.large.icon
+                |#{transfer_docs.count}
+                |transfers
+            if currentUser
+                a.ui.icon.circular.button.add_transfer(title='add')
+                    i.plus.green.large.icon
+            // .ui.left.icon.search.small.input
+            //     i.search.icon.refresh_tags
+            //     input#search_tag.prompt(type='text' autocomplete="off" placeholder='tags')
+            // if selected_tag_plural
+            //     .ui.icon.circular.black.compact.button.clear_picked_tags
+            //         i.remove.icon
+            each picked_transfer_tags
+                button.ui.blue.compact.circular.small.button.unpick_transfer_tag(tabindex='0')
+                    //- i.remove.icon
+                    | #{this}
+            each transfer_tag_results
+                button.ui.circular.compact.small.basic.button.zoomer.pick_transfer_tag(tabindex="0" class=result_class title=count)
+                    |#{name}
+                    //- small #{count}
+        .twelve.wide.column
+            span.sorting_row
+                .ui.icon.input
+                    i.search.icon
+                    input.search_transfer(type='text' placeholder='search...' value=current_transfer_search)
+                |sort by
+                .ui.compact.small.menu
+                    .ui.simple.dropdown.item
+                        strong #{current_transfer_sort_label}
+                        i.dropdown.icon
+                        .menu
+                            +set_sort_key key='member_ids' label='$/serving' icon='money'
+                            +set_sort_key key='private' label='available' icon='clock'
+                            +set_sort_key key='_timestamp' label='added' icon='clock'
+                            +set_sort_key key='comment_count' label='comment count' icon='chat'
+                .ui.compact.icon.circular.button.set_sort_direction(title='toggle sort direction')
+                    if sorting_up
+                        i.sort.amount.down.icon
+                    else
+                        i.sort.amount.up.icon
+                |&nbsp;
+            +session_set key='view_mode' value='grid' icon='th'
+            +session_set key='view_mode' value='list' icon='list'
+            if session_is 'view_mode' 'grid'
+                if one_result
+                    .ui.stackable.one.cards.scrolling
+                        each transfer_docs
+                            +transfer_card
+                else
+                    .ui.stackable.three.cards.scrolling
+                        each transfer_docs
+                            +transfer_card
+            if session_is 'view_mode' 'list'
+                .ui.selection.divided.animated.list.scrolling
+                    each transfer_docs 
+                        +transfer_item
+
+
+template(name='transfer_card')
+    .ui.card.zoomer
+        if image_id
+            a.image.zoomer.fly_right(href="/transfer/#{_id}")
+                img.ui.image(src="{{c.url image_id width=600 height=600}}")
+        .content
+            +author_info
+            +creation_info
+            each tags
+                .ui.label #{this}
+            .smallscroll
+                |!{description}
+            .ui.header #{amount}c
+            with recipient 
+                +user_info
+            //+ismall name='tags' cl='ui inline image'
+            a.ui.icon.button.zoomer(href="/transfer/#{_id}")
+                i.chevron.right.icon
+            // if is_admin
+            //     .ui.small.header slug: #{slug}
+            +print_this
+                    
+template(name='transfer_item')
+    a.item.zoomer(href="/transfer/#{_id}")
+        if image_id
+            img.ui.tiny.image(src="{{c.url image_id width=300 height=300}}")
+        //     a.image.zoomer.fly_right(href="/transfer/#{_id}")
+        .middle.aligned.content
+            a.ui.header.zoomer.fly_right(href="/transfer/#{_id}")
+                |#{title}
+            |#{member_ids.length} members
+            // .smallscroll
+            //     |!{description}
+            //+ismall name='tags' cl='ui inline image'
+        .middle.aligned.content
+            each seven_tags
+                .ui.label #{this}
+            if location 
+                i.red.marker.icon 
+                |#{location}
+            // a.zoomer(href="/transfer/#{_id}")
+            //     i.chevron.right.large.circular.icon
+            // if is_admin
+            //     .ui.small.header slug: #{slug}
+            // if can_edit
+            //     a.ui.circular.icon.button(href="/transfer/#{_id}/edit")
+            //         i.pencil.blue.icon
+            +print_this
+                    
+
+template(name='transfer_view')
+    with current_doc
+        .ui.stackable.padded.grid
+            .centered.row 
+                .five.wide.column
+                    a(href="/user/#{_author.username}") 
+                        img.ui.circular.centered.pointer.zoom.image(src="{{c.url _author.image_id height=500 width=500 gravity='face' crop='fill'}}" class=currentUser.invert_class)
+                        .ui.large.center.aligned.header.pointer.zoom
+                            |#{_author.name}
+                .five.wide.column
+                    .ui.huge.center.aligned.header
+                        |#{amount}pts
+                    if currentUser.admin_mode
+                        +delete_button
+                    .f14
+                        |!{description}
+                    .spacer
+                    +image_view key='image_id' label='image'  
+                    div 
+                    if tags
+                        i.tags.icon
+                        each tags 
+                            .ui.big.basic.circular.label #{this}
+                    +voting_full
+                    .ui.small.header
+                        i.clock.icon
+                        | #{when}
+                    .spacer
+                    .spacer
+                    +comments
+                    //- +array_view key='location_tags' label='location_tags'  
+                .five.wide.column
+                    a.fly_right(href="/user/#{recipient.username}")
+                        img.ui.circular.centered.fluid.pointer.zoom.image(src="{{c.url recipient.image_id height=500 width=500 gravity='face' crop='fill'}}" class=currentUser.invert_class)
+                        .ui.large.center.aligned.header.pointer.zoom
+                            |#{recipient.name}
+                            
+
+template(name='transfer_edit')
+    with current_doc
+        .ui.stackable.padded.grid
+            .row 
+                .five.wide.column
+                    .ui.large.fluid.basic.circular.button.cancel_transfer
+                        i.large.remove.red.icon
+                        |cancel
+                    .ui.segment
+                        .ui.inline.grey.header sender
+                        .ui.inline.header
+                            img.ui.small.image(src="{{c.url _author.user_image_id height=200 width=200 gravity='face' crop='fill'}}" class=currentUser.invert_class)
+                            |#{_author.name}
+                    .ui.segment
+                        .ui.header recipient
+                        with recipient
+                            i.large.remove.link.icon.remove_recipient
+                            a.pointer(href="/user/#{name}")
+                                img.ui.tiny.inline.image(src="{{c.url user_image_id height=400 width=400 gravity='face' crop='fill'}}" class=currentUser.invert_class)
+                                .ui.inline.header #{name}
+                                .ui.small.grey.inline.header #{points}
+                        +single_user_edit key='recipient_id' label='search member' icon='user plus'  
+                        // unless recipient
+                        //     .ui.divider
+                            // i.large.user.plus.icon
+                            // .ui.icon.input
+                            //     i.search.icon
+                            //     input.search_username(type='text' placeholder='username')
+                            // each members
+                            //     .ui.compact.basic.circular.button.add_recipient
+                            //         // i.plus.icon
+                            //         img.ui.avatar.image(src="{{c.url user_image_id height=200 width=200 gravity='face' crop='fill'}}" class=currentUser.invert_class)
+                            //         |#{name}
+                            //         small #{points}p
+                    +boolean_edit key='has_date' label='has date' icon='calendar'  
+                    if has_date
+                        +date_edit key='date' label='date'     
+                    +boolean_edit key='has_date' label='has date' icon='calendar'  
+                    if has_time
+                        +time_edit key='time' label='time'     
+                    +array_edit key='location_tags' label='location tags' icon='marker'  
+                .six.wide.column
+                    +boolean_edit key='has_description' label='has description' icon='content'  
+                    if has_description
+                        +html_edit key='body' label='description'  
+                    +boolean_edit key='has_image' label='has image' icon='image'  
+                    if has_image
+                        +image_edit key='image_id' label='image'  
+                    div
+                    +array_edit key='tags' label='tags'
+                    // .ui.inline.header
+                    //     i.tag.red.icon
+                    //     |tags
+                    // .ui.input
+                    //     input.new_tag(type='text' placeholder='+' autocomplete="off")
+                    //     //- +clear_value                
+                    // each terms 
+                    //     a.ui.large.circular.basic.button.select_term(href='#')
+                    //         if image
+                    //             img.ui.mini.rounded.inline.image(src="{{c.url image height=200 width=200 gravity='face' crop='fill'}}" class=currentUser.invert_class)
+                    //         |#{title}
+                    each tags
+                        .ui.big.basic.circular.label
+                            i.delete.icon.remove_element
+                            |#{this}
+                    // if suggestions
+                    //     .ui.small.inline.header suggestions
+                    // each suggestions
+                    //     a.ui.large.circular.basic.button.select_term(href='#')
+                    //         // if image
+                    //         //     img.ui.mini.rounded.inline.image(src="{{c.url image height=200 width=200 gravity='face' crop='fill'}}" class=currentUser.invert_class)
+                    //         |#{title}
+                .five.wide.center.aligned.column
+                    .ui.big.header 
+                        +i name='coins'
+                        |#{amount} coin
+                    .ui.big.input
+                        input.point_amount(type='number' value=amount min='1' max=point_max)
+                    div
+                    +key_value_edit key='amount' value=1
+                    +key_value_edit key='amount' value=5
+                    +key_value_edit key='amount' value=10
+                    +key_value_edit key='amount' value=20
+                    +key_value_edit key='amount' value=50
+                    .spacer
+                    .ui.center.aligned.basic.segment
+                        if can_send
+                            .ui.green.huge.circular.button.submit
+                                i.big.send.icon
+                                |send
+                        else 
+                            .ui.green.huge.circular.disabled.button
+                                i.send.big.icon
+                                |send
+                                
+                                
+                                
+        

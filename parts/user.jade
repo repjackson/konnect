@@ -1,0 +1,329 @@
+template(name='user')
+    with current_user
+        if background_image_id
+            img.ui.image.checkin_banner(src="{{c.url background_image_id height=1000 crop='crop'}}")
+        else 
+            img.ui.image.checkin_banner(src="{{c.url image_id height=1000 crop='crop'}}")
+        .ui.stackable.padded.grid
+            .row
+                .four.wide.column.scrolling
+                    // +account_finance
+                    a.ui.large.circular.compact.button.fly_left(href='/users' title='back to users')
+                        i.chevron.left.icon
+                        +i name='gender-neutral-user'
+                    // a.item(href="/user/#{current_user.username}")
+                    .ui.center.aligned.inline.header
+                        // strong #{name}
+                        strong #{first_name} #{last_name}
+                        | @#{username}        
+                        // .ui.inline.header
+                        //     strong #{name}
+                        //     //- small @#{user.username}  
+                    img.ui.circular.centered.image.pointer.boop.mobile_hidden(src="{{c.url image_id height=600 width=600 gravity='face' crop='fill'}}")
+                    img.ui.circular.small.image.inline.pointer.boop.mobile.only(src="{{c.url image_id height=400 width=400 gravity='face' crop='fill'}}")
+                    // .spacer
+                    // a(href="/user/#{username}")
+                    // if boops
+                    .ui.center.aligned.inline.header(title='boops')
+                        +i name='tap-gesture'
+                        |#{boops}
+                    a.ui.inline.header(href="/user/#{username}/credit" title='credit')
+                        +i name='coins'
+                        |#{coins}p
+                    .ui.inline.header(title='credit')
+                        +i name='star'
+                        |#{points}p
+                    // if points
+                    if is_current_user
+                        a.ui.circular.icon.compact.large.button(href="/user/#{current_user.username}/edit" title='user settings')
+                            i.cog.icon
+                            |edit user
+                    else if currentUser.admin_mode
+                        a.ui.circular.icon.compact.large.button(href="/user/#{current_user.username}/edit" title='user settings')
+                            i.shield.icon
+                            +i name='settings' cl='ui avatar image'
+                            // |edit user
+                    unless is_current_user
+                        +friend_button
+                    if is_current_user
+                        a.ui.big.image.label.button.logout
+                            // i.sign.out.alternate.icon
+                            // i.sign.out.alternate.icon
+                            +i name='exit'
+                            |log out
+                    // if currentUser.admin
+                    //     .ui.header
+                    //         +i name='shield'
+                    //         // i.shield.icon
+                    //         // |admin
+                    div
+                    +array_view key='roles' label='roles' icon='shield'
+                    div
+                    +array_view key='tags' label='tags' icon='tags'
+                    div
+                    +array_view key='skills' label='skills' icon='wrench'  
+
+                    .spacer
+                    if link 
+                        a.ui.button(href=link target='_window')
+                            i.external.icon
+                            |link
+                    if is_current_user
+                        +boolean_edit key='online' label='online'  
+                        +text_edit key='current_status' label='status' icon='clock'  
+                    else 
+                        if online 
+                            .ui.green.large.label 
+                                i.large.checkmark.icon
+                                |online
+                        else
+                            .ui.disabled.large.label 
+                                |offline
+                        if current_status
+                            .ui.small.header(title='status' )
+                                i.grey.clock.icon
+                                |!{current_status}
+                    +array_view key='allergens' label='allergens' icon='no-milk'  
+                    +array_view key='food_dislikes' label='food dislikes' icon='disgusting'  
+                    // if in_dev
+                    //     .ui.small.inline.header #{_id}
+                    +link_view key='user_link' label='user link' icon='link'  
+                    +link_view key='genekeys_link' label='genekeys link' icon='link'  
+                    +image_view key='human_design' label='human design' icon=''  
+                .twelve.wide.column.scrolling
+                    .ui.two.column.grid 
+                        // .column
+                            // +user_nav_link icon='blog' label='posts' route='posts'
+                        .column
+                            +user_posts
+                        .column
+                            +user_groups
+                        .column
+                            +user_points
+                        .column
+                            +user_comments
+                        .column
+                            +user_friends
+                        .column
+                            +user_tickets
+                        .column
+                            |!{body}
+                        .column
+                            +user_events
+
+
+template(name='user_nav_link')
+    .ui.button(href="/user/#{current_user.username}/#{route}")
+        +i name=icon
+        |#{label}
+
+
+
+template(name='user_points')
+    .ui.header
+        +i name='leaderboard'
+        |user points
+    .ui.header 
+        +i name='sent'
+        |sent 
+    .ui.button.send_points
+        |send points
+    .ui.list
+        each sent_transfers
+            .item #{when} #{amount}
+    .ui.header 
+        +i name='gift'
+        |received
+    .ui.list 
+        each received_transfers
+            .item #{when} #{amount}
+            
+
+template(name='user_posts')                    
+    .ui.header 
+        +i name='blog'
+        |posts
+    .ui.list 
+        each user_post_docs
+            a.item(href="/post/#{parent_id}") !{content}
+                small #{when}
+    // .ui.basic.icon.button.send_post
+    //     i.large.plus.icon
+    .ui.padded.stackable.two.column.grid
+        .column
+            .ui.header 
+                +i name='sent--v2'
+                |authored 
+            .ui.stackable.cards.scrolling
+                each sent_posts 
+                    .ui.card
+                        .content
+                            a(href="/post/#{_id}") 
+                                img.ui.image(src="{{c.url image_id width=400 height=300 crop='pad'}}")
+    
+                            .ui.header 
+                                |#{amount} #{recipient_username}
+                            // |created #{when}
+                            |sent {{from_now sent_timestamp}}
+                            small {{cal_time sent_timestamp}}
+                            a.ui.icon.button(href='/post/#{_id}')
+                                i.large.chevron.right.icon
+                            
+        .column
+            .ui.header 
+                +i name='gift--v1'
+                |bookmarks
+            .ui.stackable.cards.scrolling
+                each favorited
+                    .ui.card
+                        .content
+                            a(href="/post/#{_id}") 
+                                img.ui.image(src="{{c.url image_id width=400 height=300 crop='pad'}}")
+                            .ui.header 
+                                |#{amount} #{_author_username}
+                            |received {{from_now sent_timestamp}}
+                            small {{cal_time sent_timestamp}}
+                            a.ui.icon.button(href='/post/#{_id}')
+                            i.ui.large.link.chevron.right.icon.edit_address
+                
+                
+                    
+template(name='user_comments')
+    .ui.header 
+        +i name='chat'
+        |comments
+    .ui.large.selection.link.list.smallscroll
+        each model_docs_helper 'comment'
+            a.item(href="/#{parent_model}/#{parent_id}") 
+                strong #{body}
+                small #{when}
+                .ui.label #{parent_model}
+
+                    
+template(name='user_events')
+    .ui.header 
+        +i name='calendar'
+        |user events
+    if user_hosted_events.count
+        .ui.header.pointer
+            i.chess.king.icon
+            |#{user_hosted_events.count}
+            |hosted
+        .ui.large.link.animated.list
+            each user_hosted_events
+                +event_item_small
+    .ui.styled.accordion
+        .title
+            .ui.header.pointer
+                i.question.orange.icon
+                |#{user_maybe_events.count}
+                |maybe
+        .content
+            each user_maybe_events
+                +event_item_small
+        .title
+            .ui.header.pointer
+                i.checkmark.icon
+                |went
+        .content
+            each user_went_events
+                +event_item_small
+        .title
+            .ui.header.pointer
+                i.green.checkmark.icon
+                |#{user_going_events.count}
+                |going
+        .content
+            .ui.large.link.animated.list
+                each user_going_events
+                    +event_item_small
+
+template(name='user_groups')
+    a.ui.inline.header.zoomer(href="/groups")
+        +icolor name='campfire'
+        |groups
+    div
+    if user_leader_groups.count
+        .ui.header
+            // i.king.icon
+            +i name='king'
+            |group leader of
+        each user_leader_groups
+            .ui.segment
+                a.ui.header(href="/m/group/#{_id}") #{title}
+                if is_current_user
+                    +enter_group
+    if user_member_groups.count
+        a.ui.small.header.toggle_group_members.zoomer.pointer(title='toggle group members')
+            |member of 
+            |#{user_member_groups.count}
+            // if session_is 'view_group_members' true
+            //     i.chevron.down.icon
+            // else                                    
+            //     i.chevron.right.icon
+        // if session_is 'view_group_members' true
+        .ui.selection.link.list.smallscroll
+            each user_member_groups
+                +user_group_item
+
+
+template(name='user_tickets')
+    .medscrolls
+        .ui.header 
+            i.ticket.icon
+            // +i name='ticket'
+            |tickets
+        each user_event_tickets
+            .ui.card
+                if ticket_event.image_id
+                    a(href="/event/#{event_id}")
+                        img.ui.fluid.zoom.image(src="{{c.url ticket_event.image_id height=200 width=200 crop='fit'}}" class=currentUser.invert_class)
+                .content.zoom.pointer
+                    a.header(href="/event/#{event_id}")
+                        |#{ticket_event.title}
+                    // |#{fac.shortname}
+                    |#{description}
+                    |{{med_date date}}
+                    |{{long_time time}}
+
+
+template(name='user_friends')
+    .content
+        .ui.header 
+            // i.large.handshake.icon
+            +i name='friends'
+            |friends
+        +friend_button
+        // .ui.input
+        //     i.plus.icon
+        //     input.search_friend(type='text' placeholder='add by username...')
+        // if is_current_user
+        +multi_user_view key='friend_ids' label='friends'  
+        // each friend_search_results
+        //     .ui.header #{username}
+        // each user_friends
+        //     .item #{username}
+                    
+                           
+template(name='user_group_item')
+    a.item.zoomer(href="/group/#{_id}")
+        // .image
+        img.ui.avatar.image(src="{{c.url image_id height=400 width=400 crop='fit'}}" class=currentUser.invert_class)
+        .content
+            | #{title}
+            if private 
+                i.large.lock.icon(title='private')
+                       
+                                
+template(name='event_item_small')
+    a.ui.item(href="/event/#{_id}")
+        img.ui.avatar.image(src="{{c.url image_id height=400 width=400 crop='fit'}}" class=currentUser.invert_class)
+        .content
+            .header #{title} 
+            .description
+                |#{date} #{start_time}
+                if start_datetime
+                    |{{med_date start_datetime}}
+                    |{{from_now start_datetime}}
+                // +author_info
+                // +creation_info

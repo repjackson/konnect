@@ -1,0 +1,168 @@
+template(name='inbox')
+    .ui.padded.stackable.grid 
+        .row
+            .four.wide.column
+                .ui.header 
+                    i.big.inbox.icon
+                    |inbox
+                .ui.basic.big.compact.circular.button.add_message
+                    i.chat.blue.icon
+                    |+ message
+            .six.wide.column
+                .ui.header 
+                    i.chevron.down.icon
+                    |#{my_sent_messages.count} sent messages
+                .ui.list.medscroll
+                    each my_sent_messages
+                        .item
+                            img.ui.avatar.image(src="{{c.url recipient.user_image_id height=100 width=200}}" class=currentUser.invert_class)
+                            .content
+                                .header
+                                    |#{when} to #{recipient.name} #{target.name} #{to.name}
+                                |#{description} #{body}
+                                a(href="/m/message/#{_id}/view")
+                                   |view 
+                                +toggle_view_icon
+                                if can_edit
+                                    +remove_icon
+                                if in_dev
+                                    +print_this
+            .six.wide.column
+                .ui.header 
+                    i.chevron.down.icon
+                    |#{my_received_messages.count} received messages
+                .ui.list.medscroll
+                    each my_received_messages
+                        .item
+                            img.ui.avatar.image(src="{{c.url author.user_image_id height=100 width=200}}" class=currentUser.invert_class)
+                            .content
+                                .header
+                                    |#{when} from #{author.name}
+                                |#{description} #{body}
+                                .meta    
+                                    a(href="/m/message/#{_id}/view")
+                                +toggle_view_icon
+                                if can_edit
+                                    +remove_icon
+                                if in_dev
+                                    +print_this
+                                
+                                
+template(name='toggle_view_icon')
+    if is_read
+        i.eye.circular.link.grey.icon.mark_unread(title='mark unread')
+    else
+        i.eye.circular.link.large.icon.mark_read(title='mark read')
+        
+        
+template(name='message_edit')
+    with current_doc
+        .ui.stackable.padded.grid
+            .row 
+                .five.wide.column
+                    .ui.large.fluid.basic.red.button.delete_item
+                        i.large.remove.icon
+                        |cancel
+                    .ui.segment
+                        .ui.header sender
+                        .ui.header
+                            img.ui.small.image(src="{{c.url _author.image_id height=200 width=200 gravity='face' crop='fill'}}")
+                            |#{_author.name}
+                    .ui.segment
+                        .ui.header recipient
+                        with recipient
+                            i.large.remove.link.icon.remove_recipient
+                            a.pointer(href="/user/#{name}")
+                                img.ui.tiny.inline.image(src="{{c.url image_id height=400 width=400 gravity='face' crop='fill'}}")
+                                .ui.inline.header #{name}
+                                .ui.small.grey.inline.header #{points}
+                        unless recipient
+                            .ui.divider
+                            +single_user_edit key='recipient_id' label='search member' icon='user plus'  
+
+                            // i.large.user.plus.icon
+                            // // .ui.icon.input
+                            // //     i.search.icon
+                            // //     input.search_username(type='text' placeholder='username')
+                            // each members
+                            //     .ui.compact.basic.button.add_recipient
+                            //         // i.plus.icon
+                            //         img.ui.avatar.image(src="{{c.url image_id height=200 width=200 gravity='face' crop='fill'}}")
+                            //         |#{name}
+                            //         small #{points}p
+                                    
+                .six.wide.column
+                    +textarea_edit key='body' label='description'  
+                    // +image_edit key='image_id' label='image'  
+                    div 
+                    div
+                    // .ui.inline.header
+                    //     i.tags.icon
+                    //     |tags
+                    // .ui.input
+                    //     input.new_element(type='text' placeholder='+' autocomplete="off")
+                    //     //- +clear_value                
+                    // each tags
+                    //     .ui.big.basic.label
+                    //         i.delete.icon.remove_element
+                    //         |#{this}
+                    
+                    //- +array_edit key='location_tags' label='location_tags'  
+                .five.wide.column
+                    .ui.center.aligned.basic.segment
+                        if can_submit
+                            .ui.green.big.icon.circular.button.submit
+                                i.big.checkmark.icon
+                        else 
+                            .ui.big.green.big.icon.disabled.circular.button
+                                i.checkmark.big.icon
+
+
+template(name='message_item')
+    .ui.card
+        .content
+            |#{when}
+
+
+
+template(name='message_view')
+    with current_doc
+        .ui.stackable.padded.grid
+            .centered.row 
+                .five.wide.column
+                    a(href="/user/#{_author.username}") 
+                        .ui.header 
+                            i.chevron.up.icon
+                            |sender
+                        img.ui.rounded.small.image(src="{{c.url _author.image_id height=200 width=200 gravity='face' crop='fill'}}")
+                        .ui.header 
+                            |#{_author.name}
+                    a(href="/user/#{recipient.username}")
+                        .ui.header
+                            i.chevron.down.icon
+                            |recipient
+                        img.ui.rounded.small.image(src="{{c.url recipient.image_id height=200 width=200 gravity='face' crop='fill'}}")
+                        .ui.header
+                            |#{recipient.name}
+                .six.wide.column
+                    if can_edit
+                        +delete_button
+                    .ui.header
+                        i.message.icon
+                        |#{amount}pts
+                    .ui.small.header
+                        i.clock.icon
+                        | #{when}
+                    .f12
+                        |#{description}
+                    +image_view key='image_id' label='image'  
+                    div 
+                    if tags
+                        i.tags.icon
+                        each tags 
+                            .ui.big.label #{this}
+                    .spacer
+                    .spacer
+                    +comments
+                    +voting_full
+                    //- +array_view key='location_tags' label='location_tags'                  

@@ -1,0 +1,452 @@
+template(name='profiles')
+    .ui.stackable.padded.grid 
+        .sixteen.wide.column
+            .ui.inline.header 
+                +i name='blog'
+                |profiles
+                if currentUser
+                    .ui.icon.button.add_profile
+                        i.plus.large.icon
+            .ui.compact.button.toggle_yours
+                if viewing_yours
+                    i.undo.green.icon
+                else
+                    i.circle.outline.icon
+                |yours
+            each picked_profile_tags
+                a.ui.blue.button.unpick_profile_tag
+                    |#{this}
+            each tag_results
+                // if title
+                a.ui.compact.basic.circular.button.pick_profile_tag
+                    |#{name} 
+                    // small.ui.grey.text #{count}
+            +session_set key='view_mode' value='cards' icon='cards'
+            +session_set key='view_mode' value='list' icon='list'
+            i.large.sort.icon
+            +session_set key='sort_key' value='_timestamp' label='added' icon='clock'
+            +session_set key='sort_key' value='points' label='points' icon='hashtag'
+        .sixteen.wide.column
+            .scrolling
+                if subs_ready
+                    if session_is 'view_mode' 'cards'
+                        .ui.centered.stackable.cards
+                            each profile_docs 
+                                +profile_card
+                    else
+                        .ui.selection.list 
+                            each profile_docs 
+                                +profile_item
+                else 
+                    .ui.center.aligned.basic.segment
+                        i.massive.yin.yang.loading.grey.icon
+
+
+
+template(name='profile_view')
+    with current_doc
+        if background_image_id
+            img.ui.image.checkin_banner(src="{{c.url background_image_id height=1000 crop='crop'}}")
+        else 
+            img.ui.image.checkin_banner(src="{{c.url image_id height=1000 crop='crop'}}")
+        .ui.stackable.padded.grid
+            .row
+                .four.wide.column.scrolling
+                    // +account_finance
+                    a.ui.large.circular.compact.button.fly_left(href='/profiles' title='back to profiles')
+                        i.chevron.left.icon
+                        +i name='gender-neutral-profile'
+                    if can_edit 
+                        +edit_button
+                    // a.item(href="/profile/#{current_profile.profilename}")
+                    .ui.center.aligned.inline.header
+                        // strong #{name}
+                        |#{title}        
+                        // .ui.inline.header
+                        //     strong #{name}
+                        //     //- small @#{profile.profilename}  
+                    img.ui.circular.centered.image.pointer.boop.mobile_hidden(src="{{c.url image_id height=600 width=600 gravity='face' crop='fill'}}")
+                    img.ui.circular.small.image.inline.pointer.boop.mobile.only(src="{{c.url image_id height=400 width=400 gravity='face' crop='fill'}}")
+                    // .spacer
+                    // a(href="/profile/#{profilename}")
+                    // if boops
+                    .ui.center.aligned.inline.header(title='boops')
+                        +i name='tap-gesture'
+                        |#{boops}
+                    a.ui.inline.header(href="/profile/#{profilename}/credit" title='credit')
+                        +i name='coins'
+                        |#{coins}p
+                    .ui.inline.header(title='credit')
+                        +i name='star'
+                        |#{points}p
+                    // if points
+                    if is_current_profile
+                        a.ui.circular.icon.compact.large.button(href="/profile/#{current_profile.profilename}/edit" title='profile settings')
+                            i.cog.icon
+                            |edit profile
+                    else if currentprofile.admin_mode
+                        a.ui.circular.icon.compact.large.button(href="/profile/#{current_profile.profilename}/edit" title='profile settings')
+                            i.shield.icon
+                            +i name='settings' cl='ui avatar image'
+                            // |edit profile
+                    unless is_current_profile
+                        +friend_button
+                    if is_current_profile
+                        a.ui.big.image.label.button.logout
+                            // i.sign.out.alternate.icon
+                            // i.sign.out.alternate.icon
+                            +i name='exit'
+                            |log out
+                    // if currentprofile.admin
+                    //     .ui.header
+                    //         +i name='shield'
+                    //         // i.shield.icon
+                    //         // |admin
+                    div
+                    +array_view key='roles' label='roles' icon='shield'
+                    div
+                    +array_view key='tags' label='tags' icon='tags'
+                    div
+                    +array_view key='skills' label='skills' icon='wrench'  
+
+                    .spacer
+                    if link 
+                        a.ui.button(href=link target='_window')
+                            i.external.icon
+                            |link
+                    if is_current_profile
+                        +boolean_edit key='online' label='online'  
+                        +text_edit key='current_status' label='status' icon='clock'  
+                    else 
+                        if online 
+                            .ui.green.large.label 
+                                i.large.checkmark.icon
+                                |online
+                        else
+                            .ui.disabled.large.label 
+                                |offline
+                        if current_status
+                            .ui.small.header(title='status' )
+                                i.grey.clock.icon
+                                |!{current_status}
+                    if is_author
+                        a.ui.button.use_profile
+                            +i name='checkmark'
+                            |use profile
+                    +array_view key='allergens' label='allergens' icon='no-milk'  
+                    +array_view key='food_dislikes' label='food dislikes' icon='disgusting'  
+                    // if in_dev
+                    //     .ui.small.inline.header #{_id}
+                    +link_view key='profile_link' label='profile link' icon='link'  
+                    +link_view key='genekeys_link' label='genekeys link' icon='link'  
+                    +image_view key='human_design' label='human design' icon=''  
+                .twelve.wide.column.scrolling
+                    .ui.two.column.grid 
+                        .column
+                            +profile_posts
+                        .column
+                            +profile_groups
+                        .column
+                            +profile_points
+                        .column
+                            +profile_comments
+                        .column
+                            +profile_friends
+                        .column
+                            +profile_tickets
+                        .column
+                            |!{body}
+                        .column
+                            +profile_events
+
+
+
+
+
+template(name='profile_points')
+    .ui.header
+        +i name='leaderboard'
+        |profile points
+    .ui.header 
+        +i name='sent'
+        |sent 
+    .ui.button.send_points
+        |send points
+    .ui.list
+        each sent_transfers
+            .item #{when} #{amount}
+    .ui.header 
+        +i name='gift'
+        |received
+    .ui.list 
+        each received_transfers
+            .item #{when} #{amount}
+            
+
+
+
+template(name='profile_posts')                    
+    .ui.header 
+        +i name='blog'
+        |posts
+    .ui.list 
+        each profile_post_docs
+            a.item(href="/post/#{parent_id}") !{content}
+                small #{when}
+    // .ui.basic.icon.button.send_post
+    //     i.large.plus.icon
+    .ui.padded.stackable.two.column.grid
+        .column
+            .ui.header 
+                +i name='sent--v2'
+                |authored 
+            .ui.stackable.cards.scrolling
+                each sent_posts 
+                    .ui.card
+                        .content
+                            a(href="/post/#{_id}") 
+                                img.ui.image(src="{{c.url image_id width=400 height=300 crop='pad'}}")
+    
+                            .ui.header 
+                                |#{amount} #{recipient_profilename}
+                            // |created #{when}
+                            |sent {{from_now sent_timestamp}}
+                            small {{cal_time sent_timestamp}}
+                            a.ui.icon.button(href='/post/#{_id}')
+                                i.large.chevron.right.icon
+                            
+        .column
+            .ui.header 
+                +i name='gift--v1'
+                |bookmarks
+            .ui.stackable.cards.scrolling
+                each favorited
+                    .ui.card
+                        .content
+                            a(href="/post/#{_id}") 
+                                img.ui.image(src="{{c.url image_id width=400 height=300 crop='pad'}}")
+                            .ui.header 
+                                |#{amount} #{_author_profilename}
+                            |received {{from_now sent_timestamp}}
+                            small {{cal_time sent_timestamp}}
+                            a.ui.icon.button(href='/post/#{_id}')
+                            i.ui.large.link.chevron.right.icon.edit_address
+                
+template(name='profile_comments')
+    .ui.header 
+        +i name='chat'
+        |comments
+    .ui.large.selection.link.list.smallscroll
+        each model_docs_helper 'comment'
+            a.item(href="/#{parent_model}/#{parent_id}") 
+                strong #{body}
+                small #{when}
+                .ui.label #{parent_model}
+
+                    
+template(name='profile_events')
+    .ui.header 
+        +i name='calendar'
+        |profile events
+    if profile_hosted_events.count
+        .ui.header.pointer
+            i.chess.king.icon
+            |#{profile_hosted_events.count}
+            |hosted
+        .ui.large.link.animated.list
+            each profile_hosted_events
+                +event_item_small
+    .ui.styled.accordion
+        .title
+            .ui.header.pointer
+                i.question.orange.icon
+                |#{profile_maybe_events.count}
+                |maybe
+        .content
+            each profile_maybe_events
+                +event_item_small
+        .title
+            .ui.header.pointer
+                i.checkmark.icon
+                |went
+        .content
+            each profile_went_events
+                +event_item_small
+        .title
+            .ui.header.pointer
+                i.green.checkmark.icon
+                |#{profile_going_events.count}
+                |going
+        .content
+            .ui.large.link.animated.list
+                each profile_going_events
+                    +event_item_small
+
+template(name='profile_groups')
+    a.ui.inline.header.zoomer(href="/groups")
+        +icolor name='campfire'
+        |groups
+    div
+    if profile_leader_groups.count
+        .ui.header
+            // i.king.icon
+            +i name='king'
+            |group leader of
+        each profile_leader_groups
+            .ui.segment
+                a.ui.header(href="/m/group/#{_id}") #{title}
+                if is_current_profile
+                    +enter_group
+    if profile_member_groups.count
+        a.ui.small.header.toggle_group_members.zoomer.pointer(title='toggle group members')
+            |member of 
+            |#{profile_member_groups.count}
+            // if session_is 'view_group_members' true
+            //     i.chevron.down.icon
+            // else                                    
+            //     i.chevron.right.icon
+        // if session_is 'view_group_members' true
+        .ui.selection.link.list.smallscroll
+            each profile_member_groups
+                +profile_group_item
+
+
+template(name='profile_tickets')
+    .medscrolls
+        .ui.header 
+            i.ticket.icon
+            // +i name='ticket'
+            |tickets
+        each profile_event_tickets
+            .ui.card
+                if ticket_event.image_id
+                    a(href="/event/#{event_id}")
+                        img.ui.fluid.zoom.image(src="{{c.url ticket_event.image_id height=200 width=200 crop='fit'}}" class=currentprofile.invert_class)
+                .content.zoom.pointer
+                    a.header(href="/event/#{event_id}")
+                        |#{ticket_event.title}
+                    // |#{fac.shortname}
+                    |#{description}
+                    |{{med_date date}}
+                    |{{long_time time}}
+
+
+template(name='profile_friends')
+    .content
+        .ui.header 
+            // i.large.handshake.icon
+            +i name='friends'
+            |friends
+        +friend_button
+        // .ui.input
+        //     i.plus.icon
+        //     input.search_friend(type='text' placeholder='add by profilename...')
+        // if is_current_profile
+        // +multi_profile_view key='friend_ids' label='friends'  
+        // each friend_search_results
+        //     .ui.header #{profilename}
+        // each profile_friends
+        //     .item #{profilename}
+                    
+                           
+template(name='profile_group_item')
+    a.item.zoomer(href="/group/#{_id}")
+        // .image
+        img.ui.avatar.image(src="{{c.url image_id height=400 width=400 crop='fit'}}" class=currentprofile.invert_class)
+        .content
+            | #{title}
+            if private 
+                i.large.lock.icon(title='private')
+                       
+template(name='profile_edit')
+    with current_doc
+        .ui.stackable.padded.grid
+            .two.column.row 
+                .column.scrolling
+                    .ui.inline.header 
+                        +icolor name='news' cl='ui image inline pointer'
+                        |edit profile
+                    a.ui.icon.green.big.button(href="/#{model}/#{_id}/view" title='save')
+                        i.checkmark.big.icon
+                    +text_edit key='title' label='title'  
+                    
+                    // +boolean_edit key='has_content' label='has content' icon='content'  
+                    // if has_content
+                    +html_edit key='body' label='body'  
+                .column.scrolling
+                    +delete_button
+                    if currentUser.admin_mode
+                        +single_user_edit key='_author_id' label='author'  
+                    else 
+                        .ui.header 
+                            small author
+                            |#{_author.username}
+                    // +boolean_edit key='has_image' label='has image' icon='content'  
+                    // if has_image
+                    +image_edit key='image_id' label='image' icon='picture'
+                    +image_edit key='background_image_id' label='background image' icon='layout'
+                    div 
+                    +array_edit key='tags' label='tags' icon='tags'
+                    +boolean_edit key='published' icon='visible' label='published'
+                    if in_dev 
+                        +text_edit key='model' label='model' icon='shield'
+                .column.scrolling
+                    +link_edit key='oneboulder_link' 
+                    +link_edit key='facebook_link' 
+                    +array_edit key='location_tags' label='location tags' icon='marker'  
+                    // unless published
+                    //     a.ui.fluid.green.button.submit
+                    //         i.checkmark.icon
+                    //         |publish
+                    // else
+                    //     .ui.basic.button.unpublish 
+                    //         |unpublish
+                    if currentUser.admin_mode 
+                        +print_this
+                .column.scrolling
+                    .ui.header
+                        |audience
+                    +boolean_edit key='private' label='private' 
+                    +youtube_edit key='youtube_id' label='youtube' 
+                    if private 
+                        +multi_user_edit key='access_user_ids' label='user picker'  
+                    +group_picker
+                    
+template(name='profile_card')
+    .ui.card(class=profile_card_class)
+        if youtube_id
+            +youtube_view key='youtube_id'
+        img.ui.fluid.rounded.image.view_profile.fly_right(src="{{c.url image_id height=300 width=400 gravity='face' crop='fill'}}" class=currentUser.invert_class)
+        .content
+            a.ui.header.zoomer.view_profile.fly_right(href="/profile/#{_id}") #{title}
+            if private 
+                i.large.lock.icon
+            .ui.small.grey.inline.header #{_when}
+            .smallscroll
+                | !{body}
+            +comments
+            +author_info
+            if group_id     
+                +group_info
+            +voting_full
+            +tip_button
+            
+        
+template(name='profile_item')
+    .ui.fluid.segment.stackable.grid.view_profile
+        .sixteen.wide.center.aligned.column
+            a.ui.header(href="/profile/#{_id}") #{title}
+        .eight.wide.column
+            if youtube_id
+                +youtube_view key='youtube_id'
+            if image_id
+                img.ui.small.rounded.image(src="{{c.url image_id height=200 width=400 gravity='face' crop='fill'}}" class=currentUser.invert_class)
+        .eight.wide.column
+            .ui.small.grey.inline.header #{when}
+            .smallscroll
+                | !{body}
+            each seven_tags 
+                .ui.basic.small.label #{this}
+            +voting_full
+            +comments
+            +tip_button 

@@ -1,0 +1,226 @@
+template(name='posts')
+    .ui.stackable.padded.grid 
+        .sixteen.wide.column
+            .ui.inline.header 
+                +i name='blog'
+                |posts
+                if currentUser
+                    .ui.icon.button.add_post
+                        i.plus.large.icon
+            .ui.compact.button.toggle_yours
+                if viewing_yours
+                    i.undo.green.icon
+                else
+                    i.circle.outline.icon
+                |yours
+            each picked_post_tags
+                a.ui.blue.button.unpick_post_tag
+                    |#{this}
+            each tag_results
+                // if title
+                a.ui.compact.basic.circular.button.pick_post_tag
+                    |#{name} 
+                    // small.ui.grey.text #{count}
+            +session_set key='view_mode' value='cards' icon='cards'
+            +session_set key='view_mode' value='list' icon='list'
+            i.large.sort.icon
+            +session_set key='sort_key' value='_timestamp' label='added' icon='clock'
+            +session_set key='sort_key' value='points' label='points' icon='hashtag'
+        .sixteen.wide.column
+            .scrolling
+                if subs_ready
+                    if session_is 'view_mode' 'cards'
+                        .ui.centered.stackable.cards
+                            each post_docs 
+                                +post_card
+                    else
+                        .ui.selection.list 
+                            each post_docs 
+                                +post_item
+                else 
+                    .ui.center.aligned.basic.segment
+                        i.massive.yin.yang.loading.grey.icon
+
+
+template(name='set_post_sort_key')
+    .item.set_sort
+        if color
+            .ui.label(class=color) #{label}
+        else 
+            if emoji
+                em(data-emoji=emoji)
+            else if icon
+                i.icon(class=icon)
+            |#{label}
+        
+        
+
+template(name='set_view_mode_post')
+    .item.set_view
+        i.icon(class=icon)
+        |#{title}
+
+
+// template(name='set_limit')
+    .ui.compact.small.basic.button.set_limit #{amount}
+
+
+
+template(name='post_card')
+    .ui.card(class=post_card_class)
+        if youtube_id
+            +youtube_view key='youtube_id'
+        img.ui.fluid.rounded.image.view_post.fly_right(src="{{c.url image_id height=300 width=400 gravity='face' crop='fill'}}" class=currentUser.invert_class)
+        .content
+            a.ui.header.zoomer.view_post.fly_right(href="/post/#{_id}") #{title}
+            if private 
+                i.large.lock.icon
+            .ui.small.grey.inline.header #{_when}
+            .smallscroll.pointer.view_post.fly_down
+                | !{body}
+            +comments
+            +author_info
+            if group_id     
+                +group_info
+            +voting_full
+            +tip_button
+            
+        
+template(name='post_item')
+    .ui.fluid.segment.stackable.grid.view_post
+        .sixteen.wide.center.aligned.column
+            a.ui.header(href="/post/#{_id}/view") #{title}
+        .eight.wide.column
+            if youtube_id
+                +youtube_view key='youtube_id'
+            if image_id
+                img.ui.rounded.image.zoomer(src="{{c.url image_id height=200 width=400 gravity='face' crop='fill'}}" class=currentUser.invert_class)
+        .eight.wide.column
+            .ui.small.grey.inline.header #{when}
+            .smallscroll
+                | !{body}
+            each seven_tags 
+                .ui.basic.small.label #{this}
+            +voting_full
+            +comments
+            +tip_button 
+        
+
+template(name='post_view')
+    with current_doc
+        .ui.stackable.padded.grid
+            .row 
+                .eight.wide.column.scrolling
+                    .ui.header #{title}
+                    if youtube_id
+                        +youtube_view key='youtube_id' label='youtube' 
+                    img.ui.rounded.image(src="{{c.url image_id }}" class=currentUser.invert_class)
+                    // a.ui.header(href="/user/#{target.username}")
+                    //     |#{target.username}
+                    |!{body}
+                    if watson 
+                        +watson_view
+                    div 
+                    +comments
+                .four.wide.column.scrolling
+                    a.ui.circular.large.button(href="/posts" title='posts')
+                        i.chevron.left.icon
+                        +i name='blog'
+                        |posts
+                    .ui.inline.grey.header {{from_now start_datetime}}
+                    
+                    if can_edit
+                        a.ui.circular.icon.button.fly_down(href="/#{model}/#{_id}/edit" title='edit')
+                            +i name='pencil'
+                    +print_this
+                    .ui.segment
+                        .ui.header 
+                            small author
+                        a.ui.header(href="/user/#{_author.username}") 
+                            img.ui.avatar.image(src="{{c.url _author.image_id height=200 width=200 gravity='face' crop='fill'}}" class=currentUser.invert_class)
+                            |#{_author.username}
+                    .ui.list
+                        .item #{views} views
+                    each viewers
+                        .ui.label #{username
+                    +array_view key='tags' label='tags'  
+                    +voting_full
+                    +array_view key='location_tags' label='location_tags'  
+                .four.wide.column
+                    +visibility
+                    +group_widget
+                    +viewing 
+                    +follow
+                    .ui.header viewers 
+                    .ui.header bookmarks
+                    .ui.fluid.green.button.submit
+                        i.checkmark.icon
+                        |submit
+
+
+
+template(name='visibility')
+    .ui.header 
+        i.eye.icon
+        |visibility settings
+    if private 
+        .ui.header 
+            i.lock.icon
+            |private
+    if friends_only
+        .ui.header 
+            +i name='friends'
+            |friends only
+
+
+template(name='post_edit')
+    with current_doc
+        .ui.stackable.padded.grid
+            .two.column.row 
+                .column.scrolling
+                    .ui.inline.header 
+                        +icolor name='news' cl='ui image inline pointer'
+                        |edit post
+                    a.ui.icon.green.big.button(href="/#{model}/#{_id}/view" title='save')
+                        i.checkmark.big.icon
+                    +text_edit key='title' label='title'  
+                    
+                    // +boolean_edit key='has_content' label='has content' icon='content'  
+                    // if has_content
+                    +html_edit key='body' label='body'  
+                .column.scrolling
+                    i.large.link.red.remove.icon.delete_post
+                    if in_dev
+                        +single_user_edit key='_author_id' label='author'  
+                    else 
+                        .ui.header 
+                            small author
+                            |#{_author.username}
+                    // +boolean_edit key='has_image' label='has image' icon='content'  
+                    // if has_image
+                    +image_edit key='image_id' label='image'  
+                    div 
+                    +array_edit key='tags' label='tags' icon='tags'
+                    +boolean_edit key='published' icon='visible' label='published'
+                    if in_dev 
+                        +text_edit key='model' label='model' icon='shield'
+                .column.scrolling
+                    +array_edit key='location_tags' label='location tags' icon='marker'  
+                    // unless published
+                    //     a.ui.fluid.green.button.submit
+                    //         i.checkmark.icon
+                    //         |publish
+                    // else
+                    //     .ui.basic.button.unpublish 
+                    //         |unpublish
+                    if currentUser.admin_mode 
+                        +print_this
+                .column.scrolling
+                    .ui.header
+                        |audience
+                    +boolean_edit key='private' label='private' 
+                    +boolean_edit key='home' label='home' 
+                    +youtube_edit key='youtube_id' label='youtube' 
+                    if private 
+                        +multi_user_edit key='access_user_ids' label='user picker'  
+                    +group_picker

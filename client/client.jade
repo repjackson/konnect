@@ -1,0 +1,267 @@
+head
+    title phoenix culture
+    meta(name='viewport', content='user-scalable=yes, initial-scale=1.0, maximum-scale=1.5, width=device-width')
+    meta(name='apple-mobile-web-app-capable', content='yes')
+    meta(name='apple-mobile-web-app-status-bar-style', content='black')
+    
+    link(rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon.png")
+    link(rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png")
+    link(rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png")
+    link(rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png")
+    link(rel="manifest" href="/site.webmanifest")
+
+    link(rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5")
+    meta(name="apple-mobile-web-app-title" content="dao")
+    meta(name="application-name" content="dao")
+    meta(name="msapplication-TileColor" content="#da532c")
+    meta(name="theme-color" content="#ffffff")
+    
+
+    link(rel='stylesheet' type='text/css' href='https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.2/dist/semantic.min.css')
+    // link(href="https://fonts.googleapis.com/css?family=Varela+Round&display=swap" rel="stylesheet")
+    link(href="https://fonts.googleapis.com/css?family=Ubuntu:300,400&display=swap" rel="stylesheet")
+    link(href="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/css/suneditor.min.css" rel="stylesheet")
+    script(src='https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js')
+    script(src='https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.2/dist/semantic.min.js')
+    
+    // script(src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript")
+    
+    // script(src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js")
+    script(src="https://cdn.jsdelivr.net/npm/sweetalert2@9")
+    script(src="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/suneditor.min.js")
+    script(src="https://cdn.jsdelivr.net/npm/suneditor@latest/src/lang/en.js")
+
+    //- script(async='', src='https://www.googletagmanager.com/gtag/js?id=UA-140259454-1')
+    script.
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        
+        gtag('config', 'G-GLYPPRGJFQ');
+template(name='nav')
+    // https://fomantic-ui.com/elements/icon.html#/icon
+    #topnav.topnav.ui.attached.borderless.menu.hscroll
+        // if is_loading
+        //     .icon.item
+        //         i.big.loading.grey.refresh.icon.cancel
+        // else 
+        a.header.item.zoomer(href='/' class="{{isActivePath '/'}}" )
+            +icolor name='fenix'
+            // img(src='/android-chrome-192x192.png')
+            strong.mobile.hidden Phoenix Culture
+        a.icon.item.invert_toggle(title='dark mode')
+            +i name='light'
+        // // .icon.item 
+        // //     i.large.search.icon
+        .search.item.zoomer.mobile.hidden(title='search')
+            .ui.icon.input
+                if current_product_search
+                    i.remove.large.red.link.icon.clear_search
+                else
+                    i.search.large.icon
+                input.global_search(type='text' autocomplete="off" value=current_searchs)
+        .right.menu
+            if currentUser
+                a.icon.item.add_post(title='add post')
+                    // i.large.plus.icon
+                    +i name='plus'
+                a.icon.item(href="/inbox" class="{{isActiveRoute 'inbox'}}" title='inbox')
+                    // i.large.inbox.icon
+                    +i name='inbox'
+                a.icon.item(href="/chat" class="{{isActiveRoute 'view_chats'}}" title='chat')
+                    // i.large.inbox.icon
+                    +i name='chat'
+                a.icon.item(href="/coin" class="{{isActiveRoute 'coin'}}" title='bank')
+                    // i.large.inbox.icon
+                    strong #{currentUser.coins}
+                    +i name='coins'
+                // a.item.toggle_topbar.mobile.hidden(title='alerts' title='alerts')
+                //     // i.wallet.icon
+                //     // .ui.avatar.image.bell
+                //     +i name='bell'
+                // a.item(href='/user/#{currentUser.username}/credit' class="{{isActiveRoute 'user_credit'}}" title='current wallet balance')
+                // a.item(href="/user/#{currentUser.username}/credit" class="{{isActiveRoute regex='user_credit'}}" title='your credits')
+                if currentUser.current_profile_id
+                    with current_profile 
+                        a.item(href="/profile/#{_id}" class="{{isActiveRoute 'user'}}" title='user')
+                            img.ui.avatar.image(src="{{c.url image_id width=200 height=200 gravity='face' crop='fill'}}")
+                        
+                a.item(href="/user/#{currentUser.username}" class="{{isActiveRoute 'user'}}" title='user')
+                a.item(href="/user/#{currentUser.username}" class="{{isActiveRoute 'user'}}" title='user')
+                    if currentUser.image_id
+                        img.ui.avatar.image(src="{{c.url currentUser.image_id width=200 height=200 gravity='face' crop='fill'}}")
+                    else
+                        i.user.icon
+                    strong #{currentUser.name}
+                    +i name='star' cl='ui avatar image'
+                    | #{currentUser.points}p
+                // a.icon.item.toggle_rightbar.no_blink
+                //     // .ui.avatar.image
+                //     //     if currentUser.image_id
+                //     //         img.ui.mini.inline.image(src="{{c.url currentUser.image_id width=200 height=200 gravity='face' crop='fill'}}")
+                //     //     else
+                //     //         i.user.large.icon
+                //     // strong.mobile.hidden #{currentUser.name}
+                //     i.bars.large.grey.icon
+            unless subs_ready
+                .icon.item
+                    i.yin.yang.large.loading.icon
+            unless currentUser
+                a.item(href="/register" title='register')
+                    +i name='plus'
+                    span.mobile.hidden register            
+                a.item(href='/login' title='login') 
+                    // i.sign.in.large.icon
+                    +i name='internal'
+                    span.mobile.hidden login
+    .ui.attached.small.borderless.menu.hscroll
+        a.icon.item.fly_right(href="/events" class="{{isActiveRoute 'events'}}" title='events')
+            // i.large.calendar.icon
+            small #{event_counter}
+            +i name='calendar'
+            span.mobile.hidden events
+        a.icon.item.fly_right(href="/profiles" class="{{isActiveRoute 'profiles'}}" title='profiles')
+            // i.large.calendar.icon
+            small #{profile_counter}
+            +i name='groups'
+            span.mobile.hidden profiles
+        if currentUser.admin_mode
+            a.icon.item.fly_right(href="/users" class="{{isActiveRoute 'users'}}" title='users')
+                small #{user_counter}
+                // i.large.users.icon
+                +i name='gender-neutral-user'
+                .mobile.hidden users 
+        a.icon.item.fly_right(href="/groups" class="{{isActiveRoute 'groups'}}" title='groups')
+            // i.large.fire.icon
+            small #{group_counter}
+            +i name='campfire'
+            span.mobile.hidden groups
+        a.icon.item.fly_right(href="/posts" class="{{isActiveRoute 'posts'}}" title='posts')
+            // i.large.blog.icon
+            small #{post_counter}
+            +i name='blog'
+            span.mobile.hidden posts
+        a.icon.item.fly_right(href="/transfers" class="{{isActiveRoute 'transfers'}}" title='transfers')
+            // i.large.exchange.icon
+            small #{transfer_counter}
+            +i name='exchange'
+            span.mobile.hidden transfers
+        a.icon.item.fly_right(href="/tasks" class="{{isActiveRoute 'tasks'}}" title='tasks')
+            // i.large.exchange.icon
+            small #{task_counter}
+            +i name='tasks'
+            span.mobile.hidden tasks
+        a.icon.item.fly_right(href="/rentals" class="{{isActiveRoute 'rentals'}}" title='rentals')
+            // i.large.exchange.icon
+            small #{rental_counter}
+            +i name='clock'
+            span.mobile.hidden rentals
+        a.icon.item.fly_right(href="/products" class="{{isActiveRoute 'products'}}" title='products')
+            // i.large.users.icon
+            small #{product_counter}
+            +i name='shop'
+            .mobile.hidden products 
+    
+            // each model_docs
+            //     a.item.zoomer.reset(href='/m/#{slug}' class="{{isActivePath '/delta'}}")
+            //         +i name=icon
+            //         span.mobile.hidden #{title}
+                
+    
+template(name='layout')
+    // img.ui.fluid.image.(src="{{c.url 'cafe'}}")
+    // img.ui.fluid.image.checkin_banner(src="{{c.url 'frontrange' width=1000 height=1000 crop='crop'}}")    
+    +nav
+    // #main.ui.bottom.segment.attached.pushable
+        // +topbar
+        // +left_sidebar
+        // +right_sidebar
+        // .global_container
+    +yield
+    // #ain_area.global_conainer.pusher
+    if in_dev
+        +footer
+
+
+template(name='mlayout')
+    .global_container(class=invert_class)
+        unless is_frontdesk
+            +nav
+        //- img.ui.fluid.image.checkin_banner(src="{{c.url 'frontrange' width=1000 height=1000 crop='crop'}}")    
+        +yield
+
+
+template(name='home')
+    .ui.centered.four.column.padded.stackable.grid 
+        .center.aligned.row
+            each home_docs
+                .column 
+                    a.ui.fluid.card(href="/#{route}")
+                        img.ui.image.zoomer(src="{{c.url image_id width=300 height=300 crop='fit'}}")    
+                        .content
+                            .header #{title}
+                            .description 
+                                |!{body}
+template(name='not_found')
+    .ui.center.aligned.padded.basic.segment
+        +ibig name='park-bench' 
+            |browser_back
+        .ui.center.aligned.header page not found
+        a.ui.big.basic.button.fly_right(href="/") 
+            +i name='home' 
+            |home
+        .ui.basic.big.button.browser_back.fly_right
+            // i.undo.icon
+            +i name='undo'
+            |back
+
+
+template(name='shortcut_modal')
+    .ui.shortcut.modal
+        .ui.header keyboard shortcuts
+        .content
+            .ui.large.list
+                each shortcuts
+                    .item 
+                        .header #{combo}
+                        .content #{action}
+
+
+template(name='footer')
+    .ui.padded.inverted.grid.segment
+        .one.column.row
+            .column
+                if currentUser.admin_mode
+                    +print_this
+                with currentUser
+                    +print_this
+                    if in_dev
+                        +boolean_edit key='admin_mode' label='admin mode'  
+                if currentUser.admin_mode
+                    .ui.inverted.inline.header 
+                        i.user.icon
+                        |#{user_docs.count} users 
+                    each user_docs 
+                        a.ui.image.inverted.black.basic.label(href="/user/#{username}")
+                            img.ui.avatar.image.zoomer(src="{{c.url image_id width=300 height=300 crop='crop'}}")    
+                            |#{username}
+                        if current_user.admin_mode
+                            +print_this
+                    div
+                    .ui.inverted.inline.header 
+                        i.blog.icon
+                        |#{doc_docs.count} docs 
+                    each doc_docs
+                        a.ui.image.inverted.black.basic.label(href="/#{model}/#{_id}")
+                            img.ui.avatar.image.zoomer(src="{{c.url image_id width=300 height=300 crop='crop'}}")    
+                            if title
+                                |{{{cut title}}}...
+                            else if body
+                                |{{{cut body}}}...
+                            small [#{model}]
+                    div
+                    .ui.inverted.inline.header 
+                        i.tag.icon
+                        |#{result_docs.count} results 
+                    each result_docs
+                        .ui.inverted.basic.label #{name}: #{model}

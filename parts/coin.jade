@@ -1,0 +1,35 @@
+template(name='coin')
+    .ui.padded.grid
+        .ui.sixteen.wide.column
+            .ui.inline.header 
+                +i name='coins'
+                |#{my_coins.count} coins
+            +account_finance
+            if currentUser.admin_mode
+                .ui.button.mint_coin 
+                    i.shield.icon
+                    |mint
+            .ui.button.calc_coin 
+                +i name='refresh'
+                |calc
+            .ui.header my coins 
+            .ui.cards
+                each my_coins
+                    +coin_item
+                
+                
+template(name='coin_item')
+    .card 
+        .content
+            .ui.header #{_when}
+            .ui.button.transfer 
+                |transfer
+                
+                
+template(name='account_finance')
+    .ui.large.basic.circular.compact.button.zoomer.add_five_credits
+        +i name='plus'
+        strong 5
+    .ui.large.basic.circular.compact.button.zoomer.add_ten_credits
+        +i name='plus'
+        strong 10
