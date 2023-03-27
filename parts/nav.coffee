@@ -92,17 +92,6 @@ if Meteor.isClient
     
     
     Template.nav.helpers
-        event_counter: -> Counts.get('event_counter')
-        post_counter: -> Counts.get('post_counter')
-        profile_counter: -> Counts.get('profile_counter')
-        user_counter: -> Counts.get('user_count')
-        group_counter: -> Counts.get('group_counter')
-        task_counter: -> Counts.get('task_counter')
-        transfer_counter: -> Counts.get('transfer_counter')
-        rental_counter: -> Counts.get('rental_counter')
-        product_counter: -> Counts.get('product_counter')
-        
-        current_product_search: -> Session.get('product_query')
         unread_count: ->
             unread_count = Docs.find({
                 model:'message'
@@ -110,25 +99,6 @@ if Meteor.isClient
                 read_by_ids:$nin:[Meteor.userId()]
             }).count()
 
-        cart_amount: ->
-            cart_amount = Docs.find({
-                model:'cart_item'
-                status:'cart'
-                _author_id:Meteor.userId()
-            }).count()
-        cart_items: ->
-            # co = 
-            #     Docs.findOne 
-            #         model:'order'
-            #         status:'cart'
-            #         _author_id:Meteor.userId()
-            # if co 
-            Docs.find 
-                model:'cart_item'
-                _author_id: Meteor.userId()
-                # order_id:co._id
-                # status:'cart'
-                
         alert_toggle_class: ->
             if Session.get('viewing_alerts') then 'active' else ''
         unread_count: ->

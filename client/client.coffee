@@ -5,7 +5,7 @@
 # @picked_ingredients = new ReactiveArray []
 
 Template.home.onCreated ->
-    Meteor.subscribe 'home_docs', ->
+    Meteor.subscribe 'all_users', ->
 
 Template.home.helpers 
     home_docs: ->
@@ -23,14 +23,13 @@ Tracker.autorun ->
         $(window).scrollTop 0
 
 
+Template.home.helpers
+    user_docs: ->Meteor.users.find()
 Template.footer.helpers
-    doc_docs: ->
-        Docs.find {}
-    result_docs: ->
-        Results.find {}
+    doc_docs: -> Docs.find {}
+    result_docs: -> Results.find {}
+    user_docs: -> Meteor.users.find()
 
-    user_docs: ->
-        Meteor.users.find()
 # Template.home.onCreated ->
 #     @autorun => @subscribe 'model_docs', 'stats', ->
 # Template.home.onRendered ->

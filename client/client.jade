@@ -141,13 +141,15 @@ template(name='mlayout')
 template(name='home')
     .ui.centered.four.column.padded.stackable.grid 
         .center.aligned.row
-            each home_docs
+            each user_docs
                 .column 
                     a.ui.fluid.card(href="/#{route}")
                         img.ui.image.zoomer(src="{{c.url image_id width=300 height=300 crop='fit'}}")    
                         .content
-                            .header #{title}
+                            .header #{username}
                             .description 
+                                each tags 
+                                    .ui.label #{this}
                                 |!{body}
 template(name='not_found')
     .ui.center.aligned.padded.basic.segment
